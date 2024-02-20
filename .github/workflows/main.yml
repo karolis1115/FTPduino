@@ -1,3 +1,4 @@
+name: arduino-lint
 on: [workflow_dispatch]
 jobs:
   arduino-lint:
