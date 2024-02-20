@@ -1,5 +1,5 @@
 name: arduino-lint
-on: [workflow_dispatch]
+on: [workflow_dispatch, push]
 jobs:
   arduino-lint:
     runs-on: ubuntu-latest
