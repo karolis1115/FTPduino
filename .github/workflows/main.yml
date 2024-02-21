@@ -8,6 +8,6 @@ jobs:
       - uses: arduino/arduino-lint-action@v1.0.2 
         with:
             project-type: library
-            library-manager: submit
+            library-manager: update
             compliance: strict
     
