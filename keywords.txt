@@ -1,0 +1,16 @@
+#######################################
+# Datatypes	(KEYWORD1)
+#######################################
+
+FTPduino	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+connect	KEYWORD2
+disconnect	KEYWORD2
+authenticate	KEYWORD2
+setWorkDirectory	KEYWORD2
+getFileSize	KEYWORD2
+downloadFile	KEYWORD2
