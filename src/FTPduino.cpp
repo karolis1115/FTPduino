@@ -1,17 +1,14 @@
 /*
 
 FTPduino.h - Library for FTP communication with Arduino.
-Created by Karolis Juozapaitis
 
 An easy to use FTP client library for the Arduino ecosystem.
-Uses the WiFiClient library to download files from FTP servers that support Pasive mode (PASV). The library stores the received data in a user defined buffer.   
+Uses the WiFiClient library to download files from FTP servers that support Passive mode (PASV). The library stores the received data in a user defined buffer.
 
 */
 
-
 #include "Arduino.h"
 #include "FTPduino.h"
-
 
 FTPduino::FTPduino()
 {
@@ -20,76 +17,69 @@ FTPduino::FTPduino()
 
 bool FTPduino::connect(const char *serverIP, const int serverPort, const int timeout)
 {
-    // OPEN FTP CONNECTION********************************************
+    // Open a connection to the FTP server
     if (!client.connect(serverIP, serverPort))
     {
         return false;
     }
     while (!client.available())
-    {
-        delay(availCheckDelay);
-    }
+        ;
+
     return true;
 }
 
 bool FTPduino::authenticate(const char *FTPuser, const char *FTPpass)
 {
-    // Clear the client's input buffer before reading the new response
+    // Clear the client's buffer before reading the new response
     while (client.available())
     {
         client.read();
     }
 
-    // LOGIN USER******************************************************
+    // Give username to FTP server
     client.println("USER " + (String)FTPuser);
     while (!client.available())
-    {
-        delay(availCheckDelay);
-    }
+        ;
 
-    // LOGIN PASSWORD*******************************************************
+    // Give password to FTP server
     client.println("PASS " + (String)FTPpass);
     while (!client.available())
-    {
-        delay(availCheckDelay);
-    }
+        ;
+
     return true;
 }
 
 bool FTPduino::setWorkDirectory(const char *workDirectory)
 {
-    // Clear the client's input buffer before reading the new response
+    // Clear the client's buffer before reading the new response
     while (client.available())
     {
         client.read();
     }
-    // CHANGE WORKING DIRECTORY****************************************
+
+    // Change working directory
     client.println("CWD " + (String)workDirectory);
     while (!client.available())
-    {
-        delay(availCheckDelay);
-    }
+        ;
+
     return true;
 }
 
 size_t FTPduino::getFileSize(const char *fileName)
 {
-    // Clear the client's data buffer before continuing
+    // Clear the client's buffer before reading the new response
     while (client.available())
     {
         client.read();
     }
 
-    String response = "";
-    // SIZE******************************************
+    // Request file size
     client.println("SIZE " + (String)fileName);
     while (!client.available())
-    {
-        delay(availCheckDelay);
-    }
+        ;
 
     // Read messages from server until response code 213 is received
-    while (!response.startsWith("213 "))
+    while (!response.startsWith("213"))
     {
         response = client.readStringUntil('\n');
     }
@@ -99,25 +89,21 @@ size_t FTPduino::getFileSize(const char *fileName)
 
 bool FTPduino::downloadFile(const char *fileName, uint8_t *fileBuffer, size_t bufferSize)
 {
-    // Clear the client's input buffer before reading the new response
+    // Clear the client's buffer before reading the new response
     while (client.available())
     {
         client.read();
     }
 
-    // Set binary transfer type (type 'I' for B(i)nary)
+    // Set file transfer type to binary data ('I' for "Image")
     client.println("TYPE I");
     while (!client.available())
-    {
-        delay(availCheckDelay);
-    }
+        ;
 
     // Enter passive mode (PASV)
     client.println("PASV");
     while (!client.available())
-    {
-        delay(availCheckDelay);
-    }
+        ;
 
     // Clear the client's input buffer before reading the new response
     while (client.available())
@@ -126,23 +112,21 @@ bool FTPduino::downloadFile(const char *fileName, uint8_t *fileBuffer, size_t bu
     }
 
     // Parse the passive mode response
-    String response = client.readStringUntil('\n');
+    response = client.readStringUntil('\n');
     Serial.println("PASV response: " + response);
-    int ip1, ip2, ip3, ip4, portHigh, portLow;
     if (sscanf(response.c_str(), "227 Entering Passive Mode (%d,%d,%d,%d,%d,%d)", &ip1, &ip2, &ip3, &ip4, &portHigh, &portLow) != 6)
     {
         Serial.println("Failed to parse passive mode response: " + response);
         return false;
     }
 
-    // Assemble ip address from fragments received from PASV command
-    String dataIp = String(ip1) + "." + String(ip2) + "." + String(ip3) + "." + String(ip4);
+    // Assemble IP address from fragments received from PASV command
+    dataIp = String(ip1) + "." + String(ip2) + "." + String(ip3) + "." + String(ip4);
+
     // Calculate Port number from data received from PASV command
-    // int dataPort = (portHigh*256)+portLow
+    dataPort = (portHigh * 256) + portLow;
 
-    int dataPort = (portHigh << 8) + portLow;
-
-    // Create new client dedicated for data transmission
+    // Create new client dedicated to data transmission and connect to it
     Serial.println("Data client IP:" + dataIp + ":" + (String)dataPort);
     if (!Dclient.connect(dataIp.c_str(), dataPort))
     {
@@ -150,36 +134,24 @@ bool FTPduino::downloadFile(const char *fileName, uint8_t *fileBuffer, size_t bu
         return false;
     }
 
-    // Send RETR
+    // Request the file from server
     client.println("RETR " + (String)fileName);
     while (!client.available())
+        ;
+
+    // Wait for the "150" (Starting file transfer) response code
+    while (client.available() && !response.startsWith("150"))
     {
-        delay(availCheckDelay);
+        response = client.readStringUntil('\r');
     }
 
-    // Wait for the "150 Opening BINARY mode data connection" response (starting file transfer)
-    while (client.available())
-    {
-        String response = client.readStringUntil('\r');
-        if (response.startsWith("150"))
-        {
-            break;
-        }
-    }
+    // Read data until buffer gets all the data
+    bytesRead = Dclient.readBytes(fileBuffer, bufferSize);
 
-    // Read data until the connection is closed or buffer is full
-    size_t bytesRead = Dclient.readBytes(fileBuffer, bufferSize);
-    fileBuffer[bytesRead] = '\0'; // Null-terminate the buffer
-
-    // Wait for the "226 Transfer complete" response
-    while (client.available())
+    // Wait for the "226" (Transfer complete) response code
+    while (client.available() && !response.startsWith("226"))
     {
-        String response = client.readStringUntil('\r');
-        if (response.startsWith("226"))
-        {
-            Serial.println("Transfer complete");
-            break;
-        }
+        response = client.readStringUntil('\r');
     }
 
     return true;
@@ -187,6 +159,7 @@ bool FTPduino::downloadFile(const char *fileName, uint8_t *fileBuffer, size_t bu
 
 void FTPduino::disconnect()
 {
+    // Close the client connections
     client.stop();
     Dclient.stop();
 }

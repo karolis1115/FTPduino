@@ -1,10 +1,9 @@
 /*
 
 FTPduino.h - Library for FTP communication with Arduino.
-Created by Karolis Juozapaitis
 
 An easy to use FTP client library for the Arduino ecosystem.
-Uses the WiFiClient library to download files from FTP servers that support Pasive mode (PASV). The library stores the received data in a user defined buffer.
+Uses the WiFiClient library to download files from FTP servers that support Passive mode (PASV). The library stores the received data in a user defined buffer.
 
 */
 #ifndef FTPduino_h
@@ -12,8 +11,6 @@ Uses the WiFiClient library to download files from FTP servers that support Pasi
 
 #include "Arduino.h"
 #include "WiFiClient.h"
-
-#define availCheckDelay 500
 
 class FTPduino
 {
@@ -31,6 +28,14 @@ public:
 private:
     WiFiClient client;
     WiFiClient Dclient;
+
+    String response;
+
+    int ip1, ip2, ip3, ip4, portHigh, portLow;
+    String dataIp;
+    int dataPort;
+
+    size_t bytesRead;
 };
 
 #endif
