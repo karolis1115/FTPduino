@@ -1,7 +1,9 @@
 # FTPduino
 [![arduino-lint](https://github.com/karolis1115/FTPduino/actions/workflows/arduino-lint.yml/badge.svg?branch=main)](https://github.com/karolis1115/FTPduino/actions/workflows/arduino-lint.yml)
 [![Spell Check](https://github.com/karolis1115/FTPduino/actions/workflows/spell-check.yml/badge.svg?branch=main)](https://github.com/karolis1115/FTPduino/actions/workflows/spell-check.yml)
-[![arduino-library-badge](https://www.ardu-badge.com/badge/FTPduino.svg?)](https://www.ardu-badge.com/FTPduino)  
+[![Library Manager](https://github.com/karolis1115/FTPduino/blob/main/badges/Arduino%20Library%20Manager%20Badge.svg)](https://www.arduino.cc/reference/en/libraries/ftpduino/)
+
+
 
 An easy to use FTP client library for the Arduino ecosystem
 
@@ -11,5 +13,5 @@ The library stores the received data in a user defined "uint8_t" buffer which ca
 
 
 # More info
-Check out the arduino reference page for this library: https://www.arduino.cc/reference/en/libraries/ftpduino/   
-Also check out the ArduBadge page for this library (**WIP**): [![arduino-library-badge](https://www.ardu-badge.com/badge/FTPduino.svg?)](https://www.ardu-badge.com/FTPduino)
+Check out the arduino reference page for this library:  
+[![Library Manager](https://github.com/karolis1115/FTPduino/blob/main/badges/Arduino%20Library%20Manager%20Badge.svg)](https://www.arduino.cc/reference/en/libraries/ftpduino/)
