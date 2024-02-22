@@ -1,4 +1,4 @@
-name: arduino-lint
+name: arduino Lint
 on: [workflow_dispatch, push, pull_request]
 jobs:
   arduino-lint:
