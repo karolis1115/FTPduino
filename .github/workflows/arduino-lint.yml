@@ -1,11 +1,14 @@
 name: arduino-lint
-on: [workflow_dispatch, push]
+on: [workflow_dispatch, push, pull_request]
 jobs:
   arduino-lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: arduino/arduino-lint-action@v1.0.2 
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Arduino lint
+        uses: arduino/arduino-lint-action@v1.0.2 
         with:
             project-type: library
             library-manager: update

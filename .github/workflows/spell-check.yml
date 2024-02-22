@@ -1,0 +1,14 @@
+name: Spell Check
+
+on: [pull_request, push, workflow_dispatch]
+
+jobs:
+  spell-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Spell check
+        uses: codespell-project/actions-codespell@master
